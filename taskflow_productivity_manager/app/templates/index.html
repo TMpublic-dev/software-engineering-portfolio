@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <p class="eyebrow">Functional Portfolio Project</p>
+        <h1>TaskFlow Productivity Manager</h1>
+        <p class="hero-text">
+            Plan work, track progress and manage deadlines using a clean Flask task manager
+            with local SQLite storage.
+        </p>
+    </div>
+    <a class="button button-primary large" href="{{ url_for('taskflow.new_task') }}">Create your first task</a>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card"><span>Total tasks</span><strong>{{ stats.total_tasks }}</strong></article>
+    <article class="stat-card"><span>Completed</span><strong>{{ stats.completed_tasks }}</strong></article>
+    <article class="stat-card"><span>In progress</span><strong>{{ stats.in_progress_tasks }}</strong></article>
+    <article class="stat-card danger"><span>Urgent active</span><strong>{{ stats.urgent_tasks }}</strong></article>
+    <article class="stat-card danger"><span>Overdue</span><strong>{{ stats.overdue_tasks }}</strong></article>
+    <article class="stat-card"><span>Completion rate</span><strong>{{ stats.completion_rate }}%</strong></article>
+</section>
+
+<section class="panel">
+    <form class="filter-form" method="get">
+        <div class="form-group search-group">
+            <label for="search">Search</label>
+            <input type="text" id="search" name="search" value="{{ search }}" placeholder="Search title or description">
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                {% for status in statuses %}
+                    <option value="{{ status }}" {% if status == selected_status %}selected{% endif %}>{{ status }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="priority">Priority</label>
+            <select id="priority" name="priority">
+                {% for priority in priorities %}
+                    <option value="{{ priority }}" {% if priority == selected_priority %}selected{% endif %}>{{ priority }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category">
+                {% for category in categories %}
+                    <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button class="button button-primary" type="submit">Apply filters</button>
+        <a class="button button-secondary" href="{{ url_for('taskflow.index') }}">Reset</a>
+    </form>
+</section>
+
+{% if tasks %}
+    <section class="task-grid">
+        {% for task in tasks %}
+            <article class="task-card priority-{{ task.priority|lower }}">
+                <div class="task-header">
+                    <div>
+                        <span class="badge">{{ task.category }}</span>
+                        <h2>{{ task.title }}</h2>
+                    </div>
+                    <span class="priority">{{ task.priority }}</span>
+                </div>
+
+                {% if task.description %}
+                    <p class="task-description">{{ task.description }}</p>
+                {% else %}
+                    <p class="task-description muted">No description added.</p>
+                {% endif %}
+
+                <div class="task-meta">
+                    <span>Status: <strong>{{ task.status }}</strong></span>
+                    {% if task.due_date %}
+                        <span>Due: <strong>{{ task.due_date }}</strong></span>
+                    {% else %}
+                        <span>No due date</span>
+                    {% endif %}
+                </div>
+
+                <div class="progress-actions">
+                    {% if task.status != "To Do" %}
+                        <form method="post" action="{{ url_for('taskflow.change_status', task_id=task.id, new_status='To Do') }}">
+                            <button type="submit" class="mini-button">To Do</button>
+                        </form>
+                    {% endif %}
+
+                    {% if task.status != "In Progress" %}
+                        <form method="post" action="{{ url_for('taskflow.change_status', task_id=task.id, new_status='In Progress') }}">
+                            <button type="submit" class="mini-button">In Progress</button>
+                        </form>
+                    {% endif %}
+
+                    {% if task.status != "Completed" %}
+                        <form method="post" action="{{ url_for('taskflow.change_status', task_id=task.id, new_status='Completed') }}">
+                            <button type="submit" class="mini-button success">Complete</button>
+                        </form>
+                    {% endif %}
+                </div>
+
+                <div class="card-actions">
+                    <a class="button button-secondary" href="{{ url_for('taskflow.edit_task', task_id=task.id) }}">Edit</a>
+                    <form method="post" action="{{ url_for('taskflow.remove_task', task_id=task.id) }}" data-confirm="Delete this task?">
+                        <button class="button button-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="empty-state">
+        <h2>No tasks found</h2>
+        <p>Create a task or adjust the filters to see results.</p>
+        <a class="button button-primary" href="{{ url_for('taskflow.new_task') }}">Create Task</a>
+    </section>
+{% endif %}
+{% endblock %}

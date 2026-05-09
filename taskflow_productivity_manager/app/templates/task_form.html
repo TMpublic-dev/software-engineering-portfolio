@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="form-layout">
+    <div class="form-intro">
+        <p class="eyebrow">Task Management</p>
+        <h1>{{ page_title }}</h1>
+        <p>Add clear task details, set a priority and track the task through its progress stages.</p>
+    </div>
+
+    <form class="task-form panel" method="post">
+        <div class="form-group">
+            <label for="title">Title *</label>
+            <input type="text" id="title" name="title" required value="{{ task.title if task else '' }}" placeholder="e.g. Finish portfolio README">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="6" placeholder="Add useful notes, requirements or next actions">{{ task.description if task else '' }}</textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" value="{{ task.category if task else 'General' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority">
+                    {% for priority in priorities %}
+                        <option value="{{ priority }}" {% if task and task.priority == priority %}selected{% endif %}>{{ priority }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    {% for status in statuses %}
+                        <option value="{{ status }}" {% if task and task.status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="due_date">Due date</label>
+                <input type="date" id="due_date" name="due_date" value="{{ task.due_date if task and task.due_date else '' }}">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="button button-primary" type="submit">Save Task</button>
+            <a class="button button-secondary" href="{{ url_for('taskflow.index') }}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
